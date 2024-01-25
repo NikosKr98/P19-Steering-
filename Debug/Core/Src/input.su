@@ -1,0 +1,2 @@
+../Core/Src/input.c:11:6:Input	24	static
+../Core/Src/input.c:53:6:HAL_CAN_RxFifo0MsgPendingCallback	16	static
