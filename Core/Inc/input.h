@@ -8,32 +8,82 @@
 #ifndef INC_INPUT_H_
 #define INC_INPUT_H_
 
-#include "stm32f1xx_hal.h"
-#include "gpio_init.h"
-#include "struct.h"
+#include <Utils.h>
+
+//CAN IDs
+#define SHIFTER_TX_ID	0x310
+#define SIU_RX_ID		0x320
+
+#define ADC_BUFFER_SIZE 357*2							// is the size of the buffer, 2 halves of 306 samples
+#define ADC_BUFFER_HALF_SIZE ADC_BUFFER_SIZE/2			// we use it to do the division in compile time and not in run time
+
+#define VrCLUTCH_MARGIN_MIN 					0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
+#define VrCLUTCH_MARGIN_MAX 					0.1f	// the voltage above the max map voltage we accept to arrive before declaring out of bounds
+
+#define CLUTCH_PADDLE_MAX						104
+#define CLUTCH_PADDLE_MIN						-4
 
 
-#define adc_counter_const 500
-#define clutch_detection_threshold 1000
-#define FROM_SHIFTER_ID 0x320
+#define UP_BUTTON_INTERVAL						50
+#define DN_BUTTON_INTERVAL						50
+#define LAUNCH_BUTTON_INTERVAL					100
+#define EMERGENCY_BUTTON_INTERVAL				100
+#define AUXL_BUTTON_INTERVAL					100
+#define AUXR_BUTTON_INTERVAL					100
 
+extern uint16_t adcRawValue[ADC_BUFFER_SIZE];
 
 
 extern ADC_HandleTypeDef hadc1;
-extern DMA_HandleTypeDef hdma_adc1;
 extern CAN_HandleTypeDef hcan;
 
-extern CAN_FilterTypeDef FilterConfig0;
-extern CAN_RxHeaderTypeDef RxHeader;
+typedef struct _InputStruct{
 
 
-extern uint8_t RxData[8];
-extern uint32_t current, button_previous, button_interval;
-extern volatile uint16_t adc_counter;
+	//CLUTCH
+	uint8_t BrClutchPaddleInError;
+	float VrClutchPaddleRaw;
+	float rClucthPaddleRaw;
+	int8_t rClutchPaddle;
+
+	//BUTTONS
+	uint8_t BUpShiftButtonPressed;
+	uint8_t BDnShiftButtonPressed;
+	uint8_t BLaunchButtonPressed;
+	uint8_t BEmergencyButtonPressed;
+	uint8_t BAuxLeftButtonPressed;
+	uint8_t BAuxRightButtonPressed;
+
+	// + DEBOUNCE
+	uint8_t BUpShiftButtonDebounce;
+	uint8_t BDnShiftButtonDebounce;
+	uint8_t BLaunchButtonDebounce;
+	uint8_t BEmergencyButtonDebounce;
+	uint8_t BAuxLeftButtonDebounce;
+	uint8_t BAuxRightButtonDebounce;
+
+	uint8_t BUpShiftButtonInError;
+	uint8_t BDnShiftButtonInError;
+	uint8_t BLaunchButtonInError;
+	uint8_t BEmergencyButtonInError;
+	uint8_t BAuxLeftButtonInError;
+	uint8_t BAuxRightButtonInError;
+
+	// CAN
+	uint8_t NCANErrors;				// CAN Bus error count
+	uint8_t NCANRxErrors;			// CAN message receive error count
+
+	//PCB Power Supply
+	float VSupply;					// PCB Voltage Input Diagnostic
+
+
+}InputStruct;
 
 
 /* Function prototype */
-void Input(ControlData* controlData);
+
+void InitInputs(void);
+void ReadInputs(InputStruct *input);
 
 #endif /* INC_INPUT_H_ */
 

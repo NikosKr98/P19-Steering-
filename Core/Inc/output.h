@@ -8,25 +8,21 @@
 #ifndef INC_OUTPUT_H_
 #define INC_OUTPUT_H_
 
-#include "stm32f1xx_hal.h"
-#include "struct.h"
-#include "gpio_init.h"
+#include <input.h>
+#include <utils.h>
 
+//CAN
+#define SHIFTER_TX_ID 0x310
 
-
-#define TO_SHIFTER_ID 0x310
-
-
+#define CAN_TX_TIMEOUT 200		// us of CAN timeout when sending a frame
 
 extern CAN_HandleTypeDef hcan;
-extern CAN_TxHeaderTypeDef TxHeader;
-extern uint8_t TxData[8];
-
-extern uint32_t current,msg_previous,msg_interval;
+extern TIM_HandleTypeDef htim2;
 
 
 
-void CAN_Tx(uint32_t ID, uint8_t dlc, uint8_t* data);
-void Output(ControlData* controlData);
+void CAN_TX(uint32_t ID, uint8_t dlc, uint8_t* data);
+void Output(InputStruct* inputs);
+void InitOutput(void);
 
 #endif /* INC_OUTPUT_H_ */

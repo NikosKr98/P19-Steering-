@@ -54,29 +54,17 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
-
-//typedef struct {
-//
-//uint16_t clutch_position;
-//uint8_t clutch_detection;
-//uint32_t clutch_value1;
-//uint8_t up_button;
-//uint8_t down_button;
-//uint8_t action;
-//uint8_t gear;
-//
-//} ControlData;
-
-
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-//#define LED_Pin GPIO_PIN_13
-//#define LED_GPIO_Port GPIOC
-//#define DOWN_BUTTON_Pin GPIO_PIN_0
-//#define DOWN_BUTTON_GPIO_Port GPIOA
-//#define UP_BUTTON_Pin GPIO_PIN_1
-//#define UP_BUTTON_GPIO_Port GPIOA
+#define LED_Pin GPIO_PIN_13
+#define LED_GPIO_Port GPIOC
+#define DOWN_BUTTON_Pin GPIO_PIN_0
+#define DOWN_BUTTON_GPIO_Port GPIOA
+#define UP_BUTTON_Pin GPIO_PIN_1
+#define UP_BUTTON_GPIO_Port GPIOA
+#define VCC_Pin GPIO_PIN_5
+#define VCC_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

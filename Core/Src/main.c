@@ -18,13 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "input.h"
-#include "output.h"
-#include "struct.h"
-#include "gpio_init.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <Input.h>
+#include <output.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,17 +32,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TO_SHIFTER_ID 0x310
-#define FROM_SHIFTER_ID 0x320
-
-#define STEERING_ID 0x320
-
-//#define adc_counter_const 2500
-
-//#define clutch_detection_threshold 1000
-
-#define default_msg_interval 100
-#define default_button_interval 100
 
 /* USER CODE END PD */
 
@@ -56,11 +43,21 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
+
 CAN_HandleTypeDef hcan;
+
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
+
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
+uint16_t adcRawValue[ADC_BUFFER_SIZE];
+volatile uint8_t BCycleTimerFlag = 0;
+
+InputStruct Inputs;
 
 /* USER CODE END PV */
 
@@ -72,38 +69,15 @@ static void MX_TIM2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_CAN_Init(void);
 static void MX_USART1_UART_Init(void);
-
+static void MX_TIM1_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
-
-//void CAN_Tx(uint32_t ID, uint8_t dlc, uint8_t* data);
-//void Input(ControlData* controlData);
-//void Output(ControlData* controlData);
 
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-
-
-uint32_t current=0,
-		button_previous=0,
-		msg_previous=0,
-		msg_interval=default_msg_interval ,
-		button_interval=default_button_interval;
-
-volatile uint16_t adc_counter = 0;
-
-uint8_t can_errors=0;
-
-CAN_FilterTypeDef FilterConfig0;
-CAN_RxHeaderTypeDef RxHeader;
-CAN_TxHeaderTypeDef TxHeader;
-uint8_t RxData[8]={0},TxData[8]={0};
-
-ControlData myControlData;
-
 
 /* USER CODE END 0 */
 
@@ -120,7 +94,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-   HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -140,12 +114,17 @@ int main(void)
   MX_ADC1_Init();
   MX_CAN_Init();
   MX_USART1_UART_Init();
-
+  MX_TIM1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
-  HAL_ADC_Start(&hadc1);
+  HAL_TIM_Base_Start(&htim1);		// general 1MHz timer for timing
+  HAL_TIM_Base_Start_IT(&htim3);	// Code Cycle timer with interrupt (100Hz)
 
+  InitInputs();
+  InitOutput();
+
+  HAL_GPIO_WritePin(VCC_GPIO_Port,VCC_Pin,GPIO_PIN_SET); //TODO: To be deleted.
 
   /* USER CODE END 2 */
 
@@ -153,10 +132,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if(BCycleTimerFlag) {
+		  BCycleTimerFlag = 0;
+		  ReadInputs(&Inputs);
+		  Output(&Inputs);
+	  }
 
-	  current=HAL_GetTick();
-	  Input(&myControlData);
-	  Output(&myControlData);
 
 
     /* USER CODE END WHILE */
@@ -205,7 +186,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV8;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -233,12 +214,12 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 3;
+  hadc1.Init.NbrOfConversion = 1;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -246,25 +227,9 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Rank = ADC_REGULAR_RANK_2;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Rank = ADC_REGULAR_RANK_3;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -308,34 +273,103 @@ static void MX_CAN_Init(void)
   }
   /* USER CODE BEGIN CAN_Init 2 */
 
-   	// FILTER FOR STEERING WHEEL
+  // SIU RECEIVE
+     CAN_FilterTypeDef FilterConfig1;
+     FilterConfig1.FilterIdHigh = SIU_RX_ID << 5 ;
+     FilterConfig1.FilterIdLow = 0;
+     FilterConfig1.FilterMaskIdHigh = 0xffe0;
+     FilterConfig1.FilterMaskIdLow = 0;
+     FilterConfig1.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+     FilterConfig1.FilterBank = 0;
+     FilterConfig1.SlaveStartFilterBank = 0;
+     FilterConfig1.FilterMode = CAN_FILTERMODE_IDMASK;
+     FilterConfig1.FilterScale = CAN_FILTERSCALE_32BIT;
+     FilterConfig1.FilterActivation = ENABLE;
+
+     if(HAL_CAN_ConfigFilter(&hcan, &FilterConfig1)!=HAL_OK) {
+   	  Error_Handler();
+   	}
+
+     CAN_FilterTypeDef FilterConfig11;
+     FilterConfig11.FilterIdHigh = SIU_RX_ID << 5 ;
+     FilterConfig11.FilterIdLow = 0;
+     FilterConfig11.FilterMaskIdHigh = 0xffe0;
+     FilterConfig11.FilterMaskIdLow = 0;
+     FilterConfig11.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+     FilterConfig11.FilterBank = 1;
+     FilterConfig11.SlaveStartFilterBank = 0;
+     FilterConfig11.FilterMode = CAN_FILTERMODE_IDMASK;
+     FilterConfig11.FilterScale = CAN_FILTERSCALE_32BIT;
+     FilterConfig11.FilterActivation = ENABLE;
+
+     if(HAL_CAN_ConfigFilter(&hcan, &FilterConfig11)!=HAL_OK) {
+   	  Error_Handler();
+   	}
+
+     // we activate the notifications (interrupts) for FIFO0
+     if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+  	   Error_Handler();
+   	}
+     // we activate the notifications (interrupts) for FIFO1
+     if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO1_MSG_PENDING) != HAL_OK) {
+  	   Error_Handler();
+   	}
+     // we activate the notifications (interrupts) for all error codes
+     if(HAL_CAN_ActivateNotification(&hcan, (CAN_IT_ERROR_WARNING | CAN_IT_ERROR_PASSIVE | CAN_IT_BUSOFF | CAN_IT_LAST_ERROR_CODE | CAN_IT_ERROR)) != HAL_OK) {
+  	   Error_Handler();
+     }
+     // we start the CAN
+     if(HAL_CAN_Start(&hcan)!=HAL_OK) {
+   	  Error_Handler();
+     }
+  /* USER CODE END CAN_Init 2 */
+
+}
 
 
-  CAN_FilterTypeDef FilterConfig0;
-  FilterConfig0.FilterIdHigh = FROM_SHIFTER_ID << 5 ;
-  FilterConfig0.FilterIdLow = 0;
-  FilterConfig0.FilterMaskIdHigh = 0;
-  FilterConfig0.FilterMaskIdLow = 0;
-  FilterConfig0.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-  FilterConfig0.FilterBank = 0;
-  FilterConfig0.SlaveStartFilterBank = 14;
-  FilterConfig0.FilterMode = CAN_FILTERMODE_IDMASK;
-  FilterConfig0.FilterScale = CAN_FILTERSCALE_32BIT;
-  FilterConfig0.FilterActivation = ENABLE;
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
 
-  if(HAL_CAN_ConfigFilter(&hcan, &FilterConfig0)!=HAL_OK) {
-	  Error_Handler();
-	  can_errors++;
-	}
-  if(HAL_CAN_Start(&hcan)!=HAL_OK) {
-	  Error_Handler();
-	  can_errors++;
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 72-1;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 65535;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
   }
-  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
-	{
-	   Error_Handler();
-	   can_errors++;
-	}
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
 
 }
 
@@ -381,6 +415,51 @@ static void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 7200-1;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 100-1;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
 
 }
 
@@ -448,9 +527,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(VCC_GPIO_Port, VCC_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -465,100 +548,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : VCC_Pin */
+  GPIO_InitStruct.Pin = VCC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(VCC_GPIO_Port, &GPIO_InitStruct);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-//void CAN_Tx(uint32_t ID, uint8_t dlc, uint8_t* data) {
-//
-//	uint32_t TxMailbox;
-//
-//	TxHeader.DLC = dlc;
-//	TxHeader.StdId = ID;
-//	TxHeader.IDE = CAN_ID_STD;
-//	TxHeader.RTR = CAN_RTR_DATA;
-//
-//	if(HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox) != HAL_OK) {
-//		//Error_Handler();
-//
-//	}
-//}
 
-//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
-//	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-//	//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//	switch(RxHeader.StdId) {
-//
-//	 case FROM_SHIFTER_ID :
-//
-//
-//
-//	 break;
-//
-//	 }
-//}
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
-//void Input(ControlData* controlData) {
-//
-//	controlData-> action = RxData[0];
-//	controlData-> gear = RxData[1];
-//
-//
-//    HAL_ADC_PollForConversion(&hadc1, 100);
-//    uint16_t clutch_value = HAL_ADC_GetValue(&hadc1);
-//
-//    // Normal Averaging
-//    if (adc_counter < adc_counter_const) {
-//        controlData->clutch_value1 += clutch_value;
-//        adc_counter++;
-//    } else {
-//        controlData->clutch_position = controlData->clutch_value1 /adc_counter;
-//        controlData->clutch_value1=0;
-//        clutch_value = 0;
-//        adc_counter = 0;
-//
-//    }
-//
-//    controlData->clutch_detection = (controlData->clutch_position > clutch_detection_threshold) ? 1 : 0;
-//
-//    if(HAL_GPIO_ReadPin(UP_BUTTON_GPIO_Port, UP_BUTTON_Pin) == GPIO_PIN_RESET && button_previous < current && !controlData->up_button && !controlData->action){
-//    	controlData->up_button = 1;
-//    	button_previous=current;
-//    	button_previous+=button_interval;
-//    }
-//    else if(controlData->up_button && HAL_GPIO_ReadPin(UP_BUTTON_GPIO_Port, UP_BUTTON_Pin) == GPIO_PIN_SET && button_previous < current) {
-//    	controlData->up_button = 0;
-//    }
-//
-//    if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && button_previous < current && !controlData->down_button && !controlData->action){
-//        controlData->down_button = 1;
-//        button_previous=current;
-//        button_previous+=button_interval;
-//    }
-//    else if(controlData->down_button && HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && button_previous < current) {
-//        controlData->down_button = 0;
-//    }
-//}
+	if(htim == &htim3) {	// Code Cycle interrupt
+		BCycleTimerFlag = 1;
+	}
+}
 
-//void Output(ControlData* controlData) {
-//
-//	if(msg_previous<current) {	// Message Send Control
-//
-//		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-//
-//		TxData[0] = controlData->up_button;
-//		TxData[1] = controlData->down_button;
-//		TxData[2] = (controlData->clutch_position >> 8) & 0xFF;
-//		TxData[3] = controlData->clutch_position & 0xFF;
-//		msg_previous=current;
-//		msg_previous+=msg_interval;
-//		CAN_Tx(TO_SHIFTER_ID, 4, TxData);
-//
-//	  }
-//
-//
-//}
 /* USER CODE END 4 */
 
 /**
@@ -572,6 +581,8 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+	  HAL_Delay(200);
+	  NVIC_SystemReset();
   }
   /* USER CODE END Error_Handler_Debug */
 }

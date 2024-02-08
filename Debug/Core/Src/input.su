@@ -1,2 +1,8 @@
-../Core/Src/input.c:11:6:Input	24	static
-../Core/Src/input.c:53:6:HAL_CAN_RxFifo0MsgPendingCallback	16	static
+../Core/Src/input.c:26:6:ReadInputs	24	static
+../Core/Src/input.c:130:6:InitInputs	8	static
+../Core/Src/input.c:135:10:MyHalfBufferAverage	24	static
+../Core/Src/input.c:149:6:CAN_RX	56	static
+../Core/Src/input.c:171:6:HAL_CAN_RxFifo0MsgPendingCallback	16	static
+../Core/Src/input.c:175:6:HAL_CAN_RxFifo1MsgPendingCallback	16	static
+../Core/Src/input.c:179:6:HAL_CAN_ErrorCallback	16	static
+../Core/Src/input.c:183:6:HAL_ADC_ConvHalfCpltCallback	16	static
