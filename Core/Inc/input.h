@@ -14,16 +14,18 @@
 #define SHIFTER_TX_ID	0x310
 #define SIU_RX_ID		0x320
 
-#define ADC_BUFFER_SIZE 357*2							// is the size of the buffer, 2 halves of 306 samples
-#define ADC_BUFFER_HALF_SIZE ADC_BUFFER_SIZE/2			// we use it to do the division in compile time and not in run time
+// ANALOGS
+#define ADC_BUFFER_SIZE 						714		// is the size of the buffer, 2 times the samples needed for 1 cycle
+#define ADC_BUFFER_HALF_SIZE 					357		// we use it to not do the division in run time
 
+// CLUTCH
 #define VrCLUTCH_MARGIN_MIN 					0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
 #define VrCLUTCH_MARGIN_MAX 					0.1f	// the voltage above the max map voltage we accept to arrive before declaring out of bounds
 
 #define CLUTCH_PADDLE_MAX						104
 #define CLUTCH_PADDLE_MIN						-4
 
-
+// TIMING
 #define UP_BUTTON_INTERVAL						50
 #define DN_BUTTON_INTERVAL						50
 #define LAUNCH_BUTTON_INTERVAL					100
@@ -31,14 +33,13 @@
 #define AUXL_BUTTON_INTERVAL					100
 #define AUXR_BUTTON_INTERVAL					100
 
-extern uint16_t adcRawValue[ADC_BUFFER_SIZE];
 
+extern uint16_t adcRawValue[ADC_BUFFER_SIZE];
 
 extern ADC_HandleTypeDef hadc1;
 extern CAN_HandleTypeDef hcan;
 
 typedef struct _InputStruct{
-
 
 	//CLUTCH
 	uint8_t BrClutchPaddleInError;
@@ -46,7 +47,7 @@ typedef struct _InputStruct{
 	float rClucthPaddleRaw;
 	int8_t rClutchPaddle;
 
-	//BUTTONS
+	// Buttons
 	uint8_t BUpShiftButtonPressed;
 	uint8_t BDnShiftButtonPressed;
 	uint8_t BLaunchButtonPressed;
@@ -54,7 +55,7 @@ typedef struct _InputStruct{
 	uint8_t BAuxLeftButtonPressed;
 	uint8_t BAuxRightButtonPressed;
 
-	// + DEBOUNCE
+	// Debounce
 	uint8_t BUpShiftButtonDebounce;
 	uint8_t BDnShiftButtonDebounce;
 	uint8_t BLaunchButtonDebounce;
@@ -62,6 +63,7 @@ typedef struct _InputStruct{
 	uint8_t BAuxLeftButtonDebounce;
 	uint8_t BAuxRightButtonDebounce;
 
+	// Error Flags
 	uint8_t BUpShiftButtonInError;
 	uint8_t BDnShiftButtonInError;
 	uint8_t BLaunchButtonInError;

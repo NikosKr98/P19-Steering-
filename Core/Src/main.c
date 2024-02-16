@@ -17,12 +17,12 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <Input.h>
+#include <Output.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <Input.h>
-#include <output.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

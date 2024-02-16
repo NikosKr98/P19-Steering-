@@ -8,8 +8,8 @@
 #ifndef INC_OUTPUT_H_
 #define INC_OUTPUT_H_
 
-#include <input.h>
-#include <utils.h>
+#include <Input.h>
+#include <Utils.h>
 
 //CAN
 #define SHIFTER_TX_ID 0x310

@@ -1,5 +1,5 @@
-Core/Src/output.o: ../Core/Src/output.c ../Core/Inc/output.h \
- ../Core/Inc/input.h ../Core/Inc/Utils.h \
+Core/Src/Output.o: ../Core/Src/Output.c ../Core/Inc/Output.h \
+ ../Core/Inc/Input.h ../Core/Inc/Utils.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
@@ -28,9 +28,9 @@ Core/Src/output.o: ../Core/Src/output.c ../Core/Inc/output.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/main.h ../Core/Inc/utils.h
-../Core/Inc/output.h:
-../Core/Inc/input.h:
+ ../Core/Inc/main.h
+../Core/Inc/Output.h:
+../Core/Inc/Input.h:
 ../Core/Inc/Utils.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -61,4 +61,3 @@ Core/Src/output.o: ../Core/Src/output.c ../Core/Inc/output.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/main.h:
-../Core/Inc/utils.h:
