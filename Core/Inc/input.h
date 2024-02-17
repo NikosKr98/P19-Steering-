@@ -15,8 +15,9 @@
 #define SIU_RX_ID		0x320
 
 // ANALOGS
-#define ADC_BUFFER_SIZE 						714		// is the size of the buffer, 2 times the samples needed for 1 cycle
-#define ADC_BUFFER_HALF_SIZE 					357		// we use it to not do the division in run time
+#define ADC_BUFFER_SIZE							1072*2
+#define ADC_BUFFER_HALF_SIZE					ADC_BUFFER_SIZE/2
+#define ADC_NUMBER_OF_CHANNELS					4
 
 // CLUTCH
 #define VrCLUTCH_MARGIN_MIN 					0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
@@ -41,10 +42,21 @@ extern CAN_HandleTypeDef hcan;
 
 typedef struct _InputStruct{
 
+	//Analog Inputs
+	float VSIUAnalog01;
+	float VSIUAnalog02;
+	float VSIUAnalog03;
+	float VSIUAnalog04;
+
+	uint16_t NADCChannel01Raw;
+	uint16_t NADCChannel02Raw;
+	uint16_t NADCChannel03Raw;
+	uint16_t NADCChannel04Raw;
+
 	//CLUTCH
 	uint8_t BrClutchPaddleInError;
-	float VrClutchPaddleRaw;
-	float rClucthPaddleRaw;
+	float VrClutchPaddle;
+	float rClutchPaddleRaw;
 	int8_t rClutchPaddle;
 
 	// Buttons

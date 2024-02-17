@@ -15,12 +15,10 @@ uint32_t tInputsTimer=0, tUpButtonTimer=0, tDnButtonTimer=0, tLaunchButtonTimer=
 volatile uint8_t NCANErrorCount;
 volatile uint16_t NCanGetRxErrorCount=0;
 
-
-uint16_t rClutchRawADCFiltered;
 volatile uint8_t NAdcBufferSide;
 
 //Private Functions Declaration
-uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side);
+uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side, uint8_t offset);
 
 
 void ReadInputs(InputStruct *inputs){
@@ -28,19 +26,35 @@ void ReadInputs(InputStruct *inputs){
 	tInputsTimer = HAL_GetTick();
 
 	// ---------------------------------------------------------------------------------------------------
-	//Clutch Paddle
+	//Analog Inputs
 
 	//ADC Averaging
-	rClutchRawADCFiltered = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide);
+
+	inputs->NADCChannel01Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 0);
+	inputs->NADCChannel02Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 1);
+	inputs->NADCChannel03Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 2);
+	inputs->NADCChannel04Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 3);
 
 	//Voltage Conversion
-	inputs-> VrClutchPaddleRaw = (float)(rClutchRawADCFiltered * 3.3 / 4095.0);
+
+	inputs->VSIUAnalog01 = (float)(inputs->NADCChannel01Raw * 3.3 / 4095.0);
+	inputs->VSIUAnalog02 = (float)(inputs->NADCChannel02Raw * 3.3 / 4095.0);
+	inputs->VSIUAnalog03 = (float)(inputs->NADCChannel03Raw * 3.3 / 4095.0);
+	inputs->VSIUAnalog04 = (float)(inputs->NADCChannel04Raw * 3.3 / 4095.0);
+
+
+
+
+	// ---------------------------------------------------------------------------------------------------
+	//Clutch Paddle
+
+	inputs->VrClutchPaddle = inputs->VSIUAnalog01;
 
 	//Mapping
-	inputs-> BrClutchPaddleInError= My2DMapInterpolate(CLUTCH_PADDLE_MAP_SIZE, rClutchMap, inputs->VrClutchPaddleRaw, &(inputs->rClucthPaddleRaw), VrCLUTCH_MARGIN_MIN, VrCLUTCH_MARGIN_MAX);
+	inputs->BrClutchPaddleInError= My2DMapInterpolate(CLUTCH_PADDLE_MAP_SIZE, rClutchMap, inputs->VrClutchPaddle, &(inputs->rClutchPaddleRaw), VrCLUTCH_MARGIN_MIN, VrCLUTCH_MARGIN_MAX);
 
 	// Conversion from Float to int8_t
-	inputs->rClutchPaddle = (int8_t)round(inputs->rClucthPaddleRaw);
+	inputs->rClutchPaddle = (int8_t)round(inputs->rClutchPaddleRaw);
 
 	//Clamping
 	inputs->rClutchPaddle = CLAMP(inputs->rClutchPaddle, CLUTCH_PADDLE_MIN, CLUTCH_PADDLE_MAX);
@@ -51,97 +65,101 @@ void ReadInputs(InputStruct *inputs){
 	//Buttons
 
 	//Up Button
-	if(HAL_GPIO_ReadPin(UP_BUTTON_GPIO_Port, UP_BUTTON_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 1;
 		inputs->BUpShiftButtonPressed = 1;
 		tUpButtonTimer = tInputsTimer;
 		tUpButtonTimer += UP_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(UP_BUTTON_GPIO_Port, UP_BUTTON_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 0;
 		inputs->BUpShiftButtonPressed = 0;
 	}
 
 	//Down Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_RESET && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 1;
 		inputs->BDnShiftButtonPressed = 1;
 		tDnButtonTimer = tInputsTimer;
 		tDnButtonTimer += DN_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BDnShiftButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_SET && inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 0;
 		inputs->BDnShiftButtonPressed = 0;
 	}
 
 	//TODO: Fix the Buttons(New PCB rev)
 	//Launch Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tLaunchButtonTimer < tInputsTimer && !inputs->BLaunchButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin) == GPIO_PIN_RESET && tLaunchButtonTimer < tInputsTimer && !inputs->BLaunchButtonDebounce) {
 		inputs->BLaunchButtonDebounce = 1;
 		inputs->BLaunchButtonPressed = 1;
 		tLaunchButtonTimer = tInputsTimer;
 		tLaunchButtonTimer += LAUNCH_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BLaunchButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin) == GPIO_PIN_SET && inputs->BLaunchButtonDebounce) {
 		inputs->BLaunchButtonDebounce = 0;
 		inputs->BLaunchButtonPressed = 0;
 	}
 
-	//Emergency Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tEmergercyButtonTimer < tInputsTimer && !inputs->BEmergencyButtonDebounce) {
-		inputs->BEmergencyButtonDebounce = 1;
-		inputs->BEmergencyButtonPressed = 1;
-		tEmergercyButtonTimer = tInputsTimer;
-		tEmergercyButtonTimer += EMERGENCY_BUTTON_INTERVAL;
-	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BEmergencyButtonDebounce) {
-		inputs->BEmergencyButtonDebounce = 0;
-		inputs->BEmergencyButtonPressed = 0;
-	}
-
-	//Aux Left Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tAuxLeftButtonTime < tInputsTimer && !inputs->BAuxLeftButtonDebounce) {
-		inputs->BAuxLeftButtonDebounce = 1;
-		inputs->BAuxLeftButtonPressed = 1;
-		tAuxLeftButtonTime = tInputsTimer;
-		tAuxLeftButtonTime += AUXL_BUTTON_INTERVAL;
-	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BAuxLeftButtonDebounce) {
-		inputs->BAuxLeftButtonDebounce = 0;
-		inputs->BAuxLeftButtonPressed = 0;
-	}
-
 	//Aux Right Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tAuxRightButtonTime < tInputsTimer && !inputs->BAuxRightButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin) == GPIO_PIN_RESET && tAuxRightButtonTime < tInputsTimer && !inputs->BAuxRightButtonDebounce) {
 		inputs->BAuxRightButtonDebounce = 1;
 		inputs->BAuxRightButtonPressed = 1;
 		tAuxRightButtonTime = tInputsTimer;
 		tAuxRightButtonTime += AUXR_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BAuxRightButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin) == GPIO_PIN_SET && inputs->BAuxRightButtonDebounce) {
 		inputs->BAuxRightButtonDebounce = 0;
 		inputs->BAuxRightButtonPressed = 0;
 	}
+
+	//Emergency Button
+	if(HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin) == GPIO_PIN_RESET && tEmergercyButtonTimer < tInputsTimer && !inputs->BEmergencyButtonDebounce) {
+		inputs->BEmergencyButtonDebounce = 1;
+		inputs->BEmergencyButtonPressed = 1;
+		tEmergercyButtonTimer = tInputsTimer;
+		tEmergercyButtonTimer += EMERGENCY_BUTTON_INTERVAL;
+	}
+	else if(HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin) == GPIO_PIN_SET && inputs->BEmergencyButtonDebounce) {
+		inputs->BEmergencyButtonDebounce = 0;
+		inputs->BEmergencyButtonPressed = 0;
+	}
+
+	//Aux Left Button
+	if(HAL_GPIO_ReadPin(DIN06_GPIO_Port, DIN06_Pin) == GPIO_PIN_RESET && tAuxLeftButtonTime < tInputsTimer && !inputs->BAuxLeftButtonDebounce) {
+		inputs->BAuxLeftButtonDebounce = 1;
+		inputs->BAuxLeftButtonPressed = 1;
+		tAuxLeftButtonTime = tInputsTimer;
+		tAuxLeftButtonTime += AUXL_BUTTON_INTERVAL;
+	}
+	else if(HAL_GPIO_ReadPin(DIN06_GPIO_Port, DIN06_Pin) == GPIO_PIN_SET && inputs->BAuxLeftButtonDebounce) {
+		inputs->BAuxLeftButtonDebounce = 0;
+		inputs->BAuxLeftButtonPressed = 0;
+	}
+
+
 
 	// ---------------------------------------------------------------------------------------------------
 }
 
 
 void InitInputs(void) {
+	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcRawValue, ADC_BUFFER_SIZE);
 }
 
 
-uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side) {
+uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side, uint8_t offset) {
 
 	uint32_t Accumulator=0;
-	uint16_t Offset = (side == 1 ? halfsize : 0);
+	uint16_t SideOffset = (side == 1 ? halfsize : 0);
+	uint16_t maxArrayIndex = halfsize / ADC_NUMBER_OF_CHANNELS;
 
-	for(uint16_t i=0; i<halfsize; i++) {
-		Accumulator += buffer[i + Offset];
+ 	for(uint16_t i=0; i< maxArrayIndex; i++) {
+		Accumulator += buffer[(i * ADC_NUMBER_OF_CHANNELS) + offset + SideOffset];
 	}
 
-	Accumulator /= halfsize;
+	Accumulator /= maxArrayIndex;
 	return (uint16_t)Accumulator;
 
 }
