@@ -15,6 +15,8 @@
 #define ADC_BUFFER_HALF_SIZE				ADC_BUFFER_SIZE/2
 #define ADC_NUMBER_OF_CHANNELS				4
 
+#define VSUPPLY_DIVIDER_GAIN					0.23077f
+
 // CLUTCH
 #define VrCLUTCH_MARGIN_MIN 				0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
 #define VrCLUTCH_MARGIN_MAX 				0.1f	// the voltage above the max map voltage we accept to arrive before declaring out of bounds

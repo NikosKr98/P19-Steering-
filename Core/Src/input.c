@@ -55,6 +55,11 @@ void ReadInputs(InputStruct *inputs){
 	//Clamping
 	inputs->rClutchPaddle = CLAMP(inputs->rClutchPaddle, CLUTCH_PADDLE_MIN, CLUTCH_PADDLE_MAX);
 
+	// ---------------------------------------------------------------------------------------------------
+	// PCB Supply Voltage Conditioning
+
+	inputs->VSupply = inputs->VSIUAnalog04 * VSUPPLY_DIVIDER_GAIN;
+
 
 	// ---------------------------------------------------------------------------------------------------
 	//Buttons
