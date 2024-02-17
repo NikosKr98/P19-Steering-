@@ -17,6 +17,8 @@
 // ANALOGS
 #define ADC_BUFFER_SIZE 						714		// is the size of the buffer, 2 times the samples needed for 1 cycle
 #define ADC_BUFFER_HALF_SIZE 					357		// we use it to not do the division in run time
+#define ADC_DUAL_BUFFER_SIZE					716
+#define ADC_DUAL_CHANNEL_SAMPLES				179
 
 // CLUTCH
 #define VrCLUTCH_MARGIN_MIN 					0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
@@ -35,6 +37,7 @@
 
 
 extern uint16_t adcRawValue[ADC_BUFFER_SIZE];
+extern uint32_t adcDualRawValue[ADC_DUAL_BUFFER_SIZE];
 
 extern ADC_HandleTypeDef hadc1;
 extern CAN_HandleTypeDef hcan;

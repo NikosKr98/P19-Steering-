@@ -51,84 +51,87 @@ void ReadInputs(InputStruct *inputs){
 	//Buttons
 
 	//Up Button
-	if(HAL_GPIO_ReadPin(UP_BUTTON_GPIO_Port, UP_BUTTON_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 1;
 		inputs->BUpShiftButtonPressed = 1;
 		tUpButtonTimer = tInputsTimer;
 		tUpButtonTimer += UP_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(UP_BUTTON_GPIO_Port, UP_BUTTON_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 0;
 		inputs->BUpShiftButtonPressed = 0;
 	}
 
 	//Down Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_RESET && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 1;
 		inputs->BDnShiftButtonPressed = 1;
 		tDnButtonTimer = tInputsTimer;
 		tDnButtonTimer += DN_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BDnShiftButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_SET && inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 0;
 		inputs->BDnShiftButtonPressed = 0;
 	}
 
 	//TODO: Fix the Buttons(New PCB rev)
 	//Launch Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tLaunchButtonTimer < tInputsTimer && !inputs->BLaunchButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin) == GPIO_PIN_RESET && tLaunchButtonTimer < tInputsTimer && !inputs->BLaunchButtonDebounce) {
 		inputs->BLaunchButtonDebounce = 1;
 		inputs->BLaunchButtonPressed = 1;
 		tLaunchButtonTimer = tInputsTimer;
 		tLaunchButtonTimer += LAUNCH_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BLaunchButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin) == GPIO_PIN_SET && inputs->BLaunchButtonDebounce) {
 		inputs->BLaunchButtonDebounce = 0;
 		inputs->BLaunchButtonPressed = 0;
 	}
 
-	//Emergency Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tEmergercyButtonTimer < tInputsTimer && !inputs->BEmergencyButtonDebounce) {
-		inputs->BEmergencyButtonDebounce = 1;
-		inputs->BEmergencyButtonPressed = 1;
-		tEmergercyButtonTimer = tInputsTimer;
-		tEmergercyButtonTimer += EMERGENCY_BUTTON_INTERVAL;
-	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BEmergencyButtonDebounce) {
-		inputs->BEmergencyButtonDebounce = 0;
-		inputs->BEmergencyButtonPressed = 0;
-	}
-
-	//Aux Left Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tAuxLeftButtonTime < tInputsTimer && !inputs->BAuxLeftButtonDebounce) {
-		inputs->BAuxLeftButtonDebounce = 1;
-		inputs->BAuxLeftButtonPressed = 1;
-		tAuxLeftButtonTime = tInputsTimer;
-		tAuxLeftButtonTime += AUXL_BUTTON_INTERVAL;
-	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BAuxLeftButtonDebounce) {
-		inputs->BAuxLeftButtonDebounce = 0;
-		inputs->BAuxLeftButtonPressed = 0;
-	}
-
 	//Aux Right Button
-	if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_RESET && tAuxRightButtonTime < tInputsTimer && !inputs->BAuxRightButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin) == GPIO_PIN_RESET && tAuxRightButtonTime < tInputsTimer && !inputs->BAuxRightButtonDebounce) {
 		inputs->BAuxRightButtonDebounce = 1;
 		inputs->BAuxRightButtonPressed = 1;
 		tAuxRightButtonTime = tInputsTimer;
 		tAuxRightButtonTime += AUXR_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DOWN_BUTTON_GPIO_Port, DOWN_BUTTON_Pin) == GPIO_PIN_SET && inputs->BAuxRightButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin) == GPIO_PIN_SET && inputs->BAuxRightButtonDebounce) {
 		inputs->BAuxRightButtonDebounce = 0;
 		inputs->BAuxRightButtonPressed = 0;
 	}
+
+	//Emergency Button
+	if(HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin) == GPIO_PIN_RESET && tEmergercyButtonTimer < tInputsTimer && !inputs->BEmergencyButtonDebounce) {
+		inputs->BEmergencyButtonDebounce = 1;
+		inputs->BEmergencyButtonPressed = 1;
+		tEmergercyButtonTimer = tInputsTimer;
+		tEmergercyButtonTimer += EMERGENCY_BUTTON_INTERVAL;
+	}
+	else if(HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin) == GPIO_PIN_SET && inputs->BEmergencyButtonDebounce) {
+		inputs->BEmergencyButtonDebounce = 0;
+		inputs->BEmergencyButtonPressed = 0;
+	}
+
+	//Aux Left Button
+	if(HAL_GPIO_ReadPin(DIN06_GPIO_Port, DIN06_Pin) == GPIO_PIN_RESET && tAuxLeftButtonTime < tInputsTimer && !inputs->BAuxLeftButtonDebounce) {
+		inputs->BAuxLeftButtonDebounce = 1;
+		inputs->BAuxLeftButtonPressed = 1;
+		tAuxLeftButtonTime = tInputsTimer;
+		tAuxLeftButtonTime += AUXL_BUTTON_INTERVAL;
+	}
+	else if(HAL_GPIO_ReadPin(DIN06_GPIO_Port, DIN06_Pin) == GPIO_PIN_SET && inputs->BAuxLeftButtonDebounce) {
+		inputs->BAuxLeftButtonDebounce = 0;
+		inputs->BAuxLeftButtonPressed = 0;
+	}
+
+
 
 	// ---------------------------------------------------------------------------------------------------
 }
 
 
 void InitInputs(void) {
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcRawValue, ADC_BUFFER_SIZE);
+	//HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcRawValue, ADC_BUFFER_SIZE);
+	// TODO: needs to be uncommented when we finish playing with the ADCs
 }
 
 
