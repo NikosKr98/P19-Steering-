@@ -59,6 +59,7 @@ UART_HandleTypeDef huart1;
 
 uint16_t adcRawValue[ADC_BUFFER_SIZE];
 uint32_t adcDualRawValue[ADC_DUAL_BUFFER_SIZE];
+uint32_t adcDualRawValue1[2];
 volatile uint8_t BCycleTimerFlag = 0;
 
 InputStruct Inputs;
@@ -129,8 +130,8 @@ int main(void)
 
 
 //  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcRawValue, ADC_BUFFER_SIZE);
-  if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)adcDualRawValue, ADC_DUAL_BUFFER_SIZE) != HAL_OK)     Error_Handler();
-
+//  if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)adcDualRawValue, ADC_DUAL_BUFFER_SIZE) != HAL_OK)     Error_Handler();
+  if (HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t*)adcDualRawValue, 2) != HAL_OK)     Error_Handler();
 
   InitInputs();
   InitOutput();
