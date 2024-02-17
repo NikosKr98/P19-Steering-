@@ -29,20 +29,16 @@ void ReadInputs(InputStruct *inputs){
 	//Analog Inputs
 
 	//ADC Averaging
-
 	inputs->NADCChannel01Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 0);
 	inputs->NADCChannel02Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 1);
 	inputs->NADCChannel03Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 2);
 	inputs->NADCChannel04Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 3);
 
 	//Voltage Conversion
-
 	inputs->VSIUAnalog01 = (float)(inputs->NADCChannel01Raw * 3.3 / 4095.0);
 	inputs->VSIUAnalog02 = (float)(inputs->NADCChannel02Raw * 3.3 / 4095.0);
 	inputs->VSIUAnalog03 = (float)(inputs->NADCChannel03Raw * 3.3 / 4095.0);
 	inputs->VSIUAnalog04 = (float)(inputs->NADCChannel04Raw * 3.3 / 4095.0);
-
-
 
 
 	// ---------------------------------------------------------------------------------------------------
@@ -60,10 +56,10 @@ void ReadInputs(InputStruct *inputs){
 	inputs->rClutchPaddle = CLAMP(inputs->rClutchPaddle, CLUTCH_PADDLE_MIN, CLUTCH_PADDLE_MAX);
 
 
-
 	// ---------------------------------------------------------------------------------------------------
 	//Buttons
 
+	// TODO: Change the digital reading from Low to High. Remember that the buttons are connected to GND
 	//Up Button
 	if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 1;
@@ -73,6 +69,9 @@ void ReadInputs(InputStruct *inputs){
 	}
 	else if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 0;
+		inputs->BUpShiftButtonPressed = 0;
+	}
+	else if(inputs->BUpShiftButtonPressed && (tUpButtonTimer + UP_BUTTON_TIMEOUT) < tInputsTimer) {
 		inputs->BUpShiftButtonPressed = 0;
 	}
 
@@ -87,8 +86,10 @@ void ReadInputs(InputStruct *inputs){
 		inputs->BDnShiftButtonDebounce = 0;
 		inputs->BDnShiftButtonPressed = 0;
 	}
+	else if(inputs->BDnShiftButtonPressed && (tDnButtonTimer + DN_BUTTON_TIMEOUT) < tInputsTimer) {
+		inputs->BDnShiftButtonPressed = 0;
+	}
 
-	//TODO: Fix the Buttons(New PCB rev)
 	//Launch Button
 	if(HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin) == GPIO_PIN_RESET && tLaunchButtonTimer < tInputsTimer && !inputs->BLaunchButtonDebounce) {
 		inputs->BLaunchButtonDebounce = 1;

@@ -1,4 +1,4 @@
-Core/Src/output.o: ../Core/Src/output.c ../Core/Inc/Output.h \
+Core/Src/Output.o: ../Core/Src/Output.c ../Core/Inc/Output.h \
  ../Core/Inc/Input.h ../Core/Inc/Utils.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
