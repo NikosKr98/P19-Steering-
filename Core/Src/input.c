@@ -15,12 +15,10 @@ uint32_t tInputsTimer=0, tUpButtonTimer=0, tDnButtonTimer=0, tLaunchButtonTimer=
 volatile uint8_t NCANErrorCount;
 volatile uint16_t NCanGetRxErrorCount=0;
 
-
-uint16_t rClutchRawADCFiltered;
 volatile uint8_t NAdcBufferSide;
 
 //Private Functions Declaration
-uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side);
+uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side, uint8_t offset);
 
 
 void ReadInputs(InputStruct *inputs){
@@ -28,19 +26,35 @@ void ReadInputs(InputStruct *inputs){
 	tInputsTimer = HAL_GetTick();
 
 	// ---------------------------------------------------------------------------------------------------
-	//Clutch Paddle
+	//Analog Inputs
 
 	//ADC Averaging
-	rClutchRawADCFiltered = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide);
+
+	inputs->NADCChannel01Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 0);
+	inputs->NADCChannel02Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 1);
+	inputs->NADCChannel03Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 2);
+	inputs->NADCChannel04Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 3);
 
 	//Voltage Conversion
-	inputs-> VrClutchPaddleRaw = (float)(rClutchRawADCFiltered * 3.3 / 4095.0);
+
+	inputs->VSIUAnalog01 = (float)(inputs->NADCChannel01Raw * 3.3 / 4095.0);
+	inputs->VSIUAnalog02 = (float)(inputs->NADCChannel02Raw * 3.3 / 4095.0);
+	inputs->VSIUAnalog03 = (float)(inputs->NADCChannel03Raw * 3.3 / 4095.0);
+	inputs->VSIUAnalog04 = (float)(inputs->NADCChannel04Raw * 3.3 / 4095.0);
+
+
+
+
+	// ---------------------------------------------------------------------------------------------------
+	//Clutch Paddle
+
+	inputs->VrClutchPaddle = inputs->VSIUAnalog01;
 
 	//Mapping
-	inputs-> BrClutchPaddleInError= My2DMapInterpolate(CLUTCH_PADDLE_MAP_SIZE, rClutchMap, inputs->VrClutchPaddleRaw, &(inputs->rClucthPaddleRaw), VrCLUTCH_MARGIN_MIN, VrCLUTCH_MARGIN_MAX);
+	inputs->BrClutchPaddleInError= My2DMapInterpolate(CLUTCH_PADDLE_MAP_SIZE, rClutchMap, inputs->VrClutchPaddle, &(inputs->rClutchPaddleRaw), VrCLUTCH_MARGIN_MIN, VrCLUTCH_MARGIN_MAX);
 
 	// Conversion from Float to int8_t
-	inputs->rClutchPaddle = (int8_t)round(inputs->rClucthPaddleRaw);
+	inputs->rClutchPaddle = (int8_t)round(inputs->rClutchPaddleRaw);
 
 	//Clamping
 	inputs->rClutchPaddle = CLAMP(inputs->rClutchPaddle, CLUTCH_PADDLE_MIN, CLUTCH_PADDLE_MAX);
@@ -130,21 +144,22 @@ void ReadInputs(InputStruct *inputs){
 
 
 void InitInputs(void) {
-	//HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcRawValue, ADC_BUFFER_SIZE);
-	// TODO: needs to be uncommented when we finish playing with the ADCs
+	HAL_ADCEx_Calibration_Start(&hadc1);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcRawValue, ADC_BUFFER_SIZE);
 }
 
 
-uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side) {
+uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side, uint8_t offset) {
 
 	uint32_t Accumulator=0;
-	uint16_t Offset = (side == 1 ? halfsize : 0);
+	uint16_t SideOffset = (side == 1 ? halfsize : 0);
+	uint16_t maxArrayIndex = halfsize / ADC_NUMBER_OF_CHANNELS;
 
-	for(uint16_t i=0; i<halfsize; i++) {
-		Accumulator += buffer[i + Offset];
+ 	for(uint16_t i=0; i< maxArrayIndex; i++) {
+		Accumulator += buffer[(i * ADC_NUMBER_OF_CHANNELS) + offset + SideOffset];
 	}
 
-	Accumulator /= halfsize;
+	Accumulator /= maxArrayIndex;
 	return (uint16_t)Accumulator;
 
 }

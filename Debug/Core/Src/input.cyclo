@@ -1,8 +1,8 @@
-../Core/Src/Input.c:26:6:ReadInputs	32
-../Core/Src/Input.c:132:6:InitInputs	1
-../Core/Src/Input.c:138:10:MyHalfBufferAverage	3
-../Core/Src/Input.c:152:6:CAN_RX	2
-../Core/Src/Input.c:174:6:HAL_CAN_RxFifo0MsgPendingCallback	1
-../Core/Src/Input.c:178:6:HAL_CAN_RxFifo1MsgPendingCallback	1
-../Core/Src/Input.c:182:6:HAL_CAN_ErrorCallback	1
-../Core/Src/Input.c:186:6:HAL_ADC_ConvHalfCpltCallback	2
+../Core/Src/input.c:24:6:ReadInputs	32
+../Core/Src/input.c:146:6:InitInputs	1
+../Core/Src/input.c:152:10:MyHalfBufferAverage	3
+../Core/Src/input.c:167:6:CAN_RX	2
+../Core/Src/input.c:189:6:HAL_CAN_RxFifo0MsgPendingCallback	1
+../Core/Src/input.c:193:6:HAL_CAN_RxFifo1MsgPendingCallback	1
+../Core/Src/input.c:197:6:HAL_CAN_ErrorCallback	1
+../Core/Src/input.c:201:6:HAL_ADC_ConvHalfCpltCallback	2
