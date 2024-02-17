@@ -60,13 +60,13 @@ void ReadInputs(InputStruct *inputs){
 	//Buttons
 
 	//Up Button
-	if(HAL_GPIO_ReadPin(DIN07_GPIO_Port, DIN01_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 1;
 		inputs->BUpShiftButtonPressed = 1;
 		tUpButtonTimer = tInputsTimer;
 		tUpButtonTimer += UP_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DIN07_GPIO_Port, DIN01_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 0;
 		inputs->BUpShiftButtonPressed = 0;
 	}
@@ -75,13 +75,13 @@ void ReadInputs(InputStruct *inputs){
 	}
 
 	//Down Button
-	if(HAL_GPIO_ReadPin(DIN08_GPIO_Port, DIN02_Pin) == GPIO_PIN_RESET && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
+	if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_RESET && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 1;
 		inputs->BDnShiftButtonPressed = 1;
 		tDnButtonTimer = tInputsTimer;
 		tDnButtonTimer += DN_BUTTON_INTERVAL;
 	}
-	else if(HAL_GPIO_ReadPin(DIN08_GPIO_Port, DIN02_Pin) == GPIO_PIN_SET && inputs->BDnShiftButtonDebounce) {
+	else if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_SET && inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 0;
 		inputs->BDnShiftButtonPressed = 0;
 	}
@@ -151,7 +151,7 @@ void InitInputs(void) {
 
 uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side, uint8_t offset) {
 
-	uint32_t Accumulator=0;
+	uint32_t Accumulator = 0;
 	uint16_t SideOffset = (side == 1 ? halfsize : 0);
 	uint16_t maxArrayIndex = halfsize / ADC_NUMBER_OF_CHANNELS;
 

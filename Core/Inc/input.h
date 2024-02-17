@@ -10,32 +10,33 @@
 
 #include <Utils.h>
 
-//CAN IDs
-#define SHIFTER_TX_ID	0x310
-#define SIU_RX_ID		0x320
-
 // ANALOGS
-#define ADC_BUFFER_SIZE							1072*2
-#define ADC_BUFFER_HALF_SIZE					ADC_BUFFER_SIZE/2
-#define ADC_NUMBER_OF_CHANNELS					4
+#define ADC_BUFFER_SIZE						1072*2
+#define ADC_BUFFER_HALF_SIZE				ADC_BUFFER_SIZE/2
+#define ADC_NUMBER_OF_CHANNELS				4
 
 // CLUTCH
-#define VrCLUTCH_MARGIN_MIN 					0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
-#define VrCLUTCH_MARGIN_MAX 					0.1f	// the voltage above the max map voltage we accept to arrive before declaring out of bounds
+#define VrCLUTCH_MARGIN_MIN 				0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
+#define VrCLUTCH_MARGIN_MAX 				0.1f	// the voltage above the max map voltage we accept to arrive before declaring out of bounds
 
-#define CLUTCH_PADDLE_MAX						104
-#define CLUTCH_PADDLE_MIN						-4
+#define CLUTCH_PADDLE_MAX					104
+#define CLUTCH_PADDLE_MIN					-4
 
 // TIMING
-#define UP_BUTTON_INTERVAL						50
-#define DN_BUTTON_INTERVAL						50
-#define LAUNCH_BUTTON_INTERVAL					100
-#define EMERGENCY_BUTTON_INTERVAL				100
-#define AUXL_BUTTON_INTERVAL					100
-#define AUXR_BUTTON_INTERVAL					100
+#define UP_BUTTON_INTERVAL					50
+#define DN_BUTTON_INTERVAL					50
+#define LAUNCH_BUTTON_INTERVAL				100
+#define EMERGENCY_BUTTON_INTERVAL			100
+#define AUXL_BUTTON_INTERVAL				100
+#define AUXR_BUTTON_INTERVAL				100
 
-#define UP_BUTTON_TIMEOUT						1000 - UP_BUTTON_INTERVAL
-#define DN_BUTTON_TIMEOUT						1000 - DN_BUTTON_INTERVAL
+#define UP_BUTTON_TIMEOUT					1000 - UP_BUTTON_INTERVAL
+#define DN_BUTTON_TIMEOUT					1000 - DN_BUTTON_INTERVAL
+
+// CAN
+#define SIU_TX_ID							0x310
+#define SIU_RX_ID							0x320
+
 
 extern uint16_t adcRawValue[ADC_BUFFER_SIZE];
 

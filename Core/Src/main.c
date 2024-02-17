@@ -578,9 +578,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIN03_Pin DIN02_Pin DIN01_Pin DIN04_Pin
-                           DIN05_Pin */
+                           DIN05_Pin DIN07_Pin DIN08_Pin */
   GPIO_InitStruct.Pin = DIN03_Pin|DIN02_Pin|DIN01_Pin|DIN04_Pin
-                          |DIN05_Pin;
+                          |DIN05_Pin|DIN07_Pin|DIN08_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -592,12 +592,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : DIN07_Pin DIN08_Pin */
-  GPIO_InitStruct.Pin = DIN07_Pin|DIN08_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */

@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000c55  00000000  00000000  00035938  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00019e6c  00000000  00000000  0003658d  2**0
+ 17 .debug_macro  00019ec9  00000000  00000000  0003658d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   000139c7  00000000  00000000  000503f9  2**0
+ 18 .debug_line   000139c7  00000000  00000000  00050456  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000934d0  00000000  00000000  00063dc0  2**0
+ 19 .debug_str    000934e0  00000000  00000000  00063e1d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  000049b4  00000000  00000000  000f7290  2**2
+ 20 .debug_frame  000049b4  00000000  00000000  000f7300  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000005d  00000000  00000000  000fbc44  2**0
+ 21 .debug_line_str 0000005d  00000000  00000000  000fbcb4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1559,10 +1559,10 @@ void ReadInputs(InputStruct *inputs){
  8001194:	2268      	movs	r2, #104	; 0x68
  8001196:	687b      	ldr	r3, [r7, #4]
  8001198:	f883 2024 	strb.w	r2, [r3, #36]	; 0x24
+
 	// ---------------------------------------------------------------------------------------------------
 	//Buttons
 
-	// TODO: Change the digital reading from Low to High. Remember that the buttons are connected to GND
 	//Up Button
 	if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
  800119c:	2104      	movs	r1, #4
@@ -2026,7 +2026,7 @@ uint16_t MyHalfBufferAverage(uint16_t *buffer, uint16_t halfsize, uint8_t side, 
  8001512:	4613      	mov	r3, r2
  8001514:	703b      	strb	r3, [r7, #0]
 
-	uint32_t Accumulator=0;
+	uint32_t Accumulator = 0;
  8001516:	2300      	movs	r3, #0
  8001518:	617b      	str	r3, [r7, #20]
 	uint16_t SideOffset = (side == 1 ? halfsize : 0);
