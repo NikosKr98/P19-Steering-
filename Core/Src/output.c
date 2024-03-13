@@ -8,7 +8,7 @@
 #include <Output.h>
 
 //CAN
-uint8_t TxBuffer[8] = {0};
+uint8_t CANTxBuffer[8] = {0};
 
 uint32_t nCanTxErrorCount=0;
 uint32_t nCanOldestMailbox=4, nCanSecondOldestMailbox=2, nCanYoungestMailbox=1;
@@ -20,32 +20,34 @@ void InitOutput() {
 void Output(InputStruct* inputs) {
 
 
-	TxBuffer[0] = 0;
-	TxBuffer[0] |= (inputs->BUpShiftButtonInError 	& 0x01) << 0;
-	TxBuffer[0] |= (inputs->BDnShiftButtonInError 	& 0x01) << 1;
-	TxBuffer[0] |= (inputs->BLaunchButtonInError  	& 0x01) << 2;
-	TxBuffer[0] |= (inputs->BEmergencyButtonInError & 0x01) << 3;
-	TxBuffer[0] |= (inputs->BAuxLeftButtonInError   & 0x01) << 4;
-	TxBuffer[0] |= (inputs->BAuxRightButtonInError	& 0x01) << 5;
-	TxBuffer[0] |= (inputs->BrClutchPaddleInError	& 0x01) << 6;
+	CANTxBuffer[0] = 0;
+	CANTxBuffer[0] |= (inputs->BUpShiftButtonInError 	& 0x01) << 0;
+	CANTxBuffer[0] |= (inputs->BDnShiftButtonInError 	& 0x01) << 1;
+	CANTxBuffer[0] |= (0							  	& 0x01) << 2;
+	CANTxBuffer[0] |= (0								& 0x01) << 3;
+	CANTxBuffer[0] |= (0							    & 0x01) << 4;
+	CANTxBuffer[0] |= (0								& 0x01) << 5;
+	CANTxBuffer[0] |= (inputs->BrClutchPaddleInError	& 0x01) << 6;
+	CANTxBuffer[0] |= (0								& 0x01) << 7;
 
+	CANTxBuffer[1] = 0;
+	CANTxBuffer[1] |= (inputs->BUpShiftButtonPressed 	& 0x01) << 0;
+	CANTxBuffer[1] |= (inputs->BDnShiftButtonPressed 	& 0x01) << 1;
+	CANTxBuffer[1] |= (inputs->BButtonAPressed  		& 0x01) << 2;
+	CANTxBuffer[1] |= (inputs->BButtonBPressed 			& 0x01) << 3;
+	CANTxBuffer[1] |= (inputs->BButtonCPressed   		& 0x01) << 4;
+	CANTxBuffer[1] |= (inputs->BButtonDPressed			& 0x01) << 5;
+	CANTxBuffer[1] |= (inputs->BButtonEPressed			& 0x01) << 6;
+	CANTxBuffer[1] |= (inputs->BButtonFPressed			& 0x01) << 7;
 
-	TxBuffer[1] = 0;
-	TxBuffer[1] |= (inputs->BUpShiftButtonPressed 	& 0x01) << 0;
-	TxBuffer[1] |= (inputs->BDnShiftButtonPressed 	& 0x01) << 1;
-	TxBuffer[1] |= (inputs->BLaunchButtonPressed  	& 0x01) << 2;
-	TxBuffer[1] |= (inputs->BEmergencyButtonPressed & 0x01) << 3;
-	TxBuffer[1] |= (inputs->BAuxLeftButtonPressed   & 0x01) << 4;
-	TxBuffer[1] |= (inputs->BAuxRightButtonPressed	& 0x01) << 5;
-
-	TxBuffer[2] = inputs->rClutchPaddle;
+	CANTxBuffer[2] = inputs->rClutchPaddle;
 
 	uint16_t VSupplyCAN = (uint16_t)(inputs->VSupply * 1000);
 
-	TxBuffer[3] = (VSupplyCAN & 0xFF00) >> 8;
-	TxBuffer[4] = (VSupplyCAN & 0x00FF) >> 0;
+	CANTxBuffer[3] = (VSupplyCAN & 0xFF00) >> 8;
+	CANTxBuffer[4] = (VSupplyCAN & 0x00FF) >> 0;
 
-	CAN_TX(SHIFTER_TX_ID,8,TxBuffer);
+	CAN_TX(SHIFTER_TX_ID, 8, CANTxBuffer);
 }
 
 

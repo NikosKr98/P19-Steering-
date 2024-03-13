@@ -15,7 +15,7 @@
 #define ADC_BUFFER_HALF_SIZE				ADC_BUFFER_SIZE/2
 #define ADC_NUMBER_OF_CHANNELS				4
 
-#define VSUPPLY_DIVIDER_GAIN					0.23077f
+#define VSUPPLY_DIVIDER_GAIN				0.23077f
 
 // CLUTCH
 #define VrCLUTCH_MARGIN_MIN 				0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
@@ -24,16 +24,19 @@
 #define CLUTCH_PADDLE_MAX					104
 #define CLUTCH_PADDLE_MIN					-4
 
-// TIMING
-#define UP_BUTTON_INTERVAL					50
-#define DN_BUTTON_INTERVAL					50
-#define LAUNCH_BUTTON_INTERVAL				100
-#define EMERGENCY_BUTTON_INTERVAL			100
-#define AUXL_BUTTON_INTERVAL				100
-#define AUXR_BUTTON_INTERVAL				100
+// TIMING (ms)
+#define UP_BUTTON_DEBOUNCE					50
+#define DN_BUTTON_DEBOUNCE					50
+#define UP_BUTTON_TIMEOUT					1000 - UP_BUTTON_DEBOUNCE
+#define DN_BUTTON_TIMEOUT					1000 - DN_BUTTON_DEBOUNCE
 
-#define UP_BUTTON_TIMEOUT					1000 - UP_BUTTON_INTERVAL
-#define DN_BUTTON_TIMEOUT					1000 - DN_BUTTON_INTERVAL
+#define BUTTON_A_DEBOUNCE					100
+#define BUTTON_B_DEBOUNCE					100
+#define BUTTON_C_DEBOUNCE					100
+#define BUTTON_D_DEBOUNCE					100
+#define BUTTON_E_DEBOUNCE					100
+#define BUTTON_F_DEBOUNCE					100
+
 
 // CAN
 #define SIU_TX_ID							0x310
@@ -67,26 +70,30 @@ typedef struct _InputStruct{
 	// Buttons
 	uint8_t BUpShiftButtonPressed;
 	uint8_t BDnShiftButtonPressed;
-	uint8_t BLaunchButtonPressed;
-	uint8_t BEmergencyButtonPressed;
-	uint8_t BAuxLeftButtonPressed;
-	uint8_t BAuxRightButtonPressed;
+
+	uint8_t BButtonAPressed;
+	uint8_t BButtonBPressed;
+	uint8_t BButtonCPressed;
+	uint8_t BButtonDPressed;
+	uint8_t BButtonEPressed;
+	uint8_t BButtonFPressed;
 
 	// Debounce
 	uint8_t BUpShiftButtonDebounce;
 	uint8_t BDnShiftButtonDebounce;
-	uint8_t BLaunchButtonDebounce;
-	uint8_t BEmergencyButtonDebounce;
-	uint8_t BAuxLeftButtonDebounce;
-	uint8_t BAuxRightButtonDebounce;
+
+	uint8_t BButtonADebounce;
+	uint8_t BButtonBDebounce;
+	uint8_t BButtonCDebounce;
+	uint8_t BButtonDDebounce;
+	uint8_t BButtonEDebounce;
+	uint8_t BButtonFDebounce;
+
 
 	// Error Flags
 	uint8_t BUpShiftButtonInError;
 	uint8_t BDnShiftButtonInError;
-	uint8_t BLaunchButtonInError;
-	uint8_t BEmergencyButtonInError;
-	uint8_t BAuxLeftButtonInError;
-	uint8_t BAuxRightButtonInError;
+
 
 	// CAN
 	uint8_t NCANErrors;				// CAN Bus error count
