@@ -70,7 +70,7 @@ void ReadInputs(InputStruct *inputs){
 	inputs->rClutchPaddle = (int8_t)round(inputs->rClutchPaddleRaw);
 
 	//Clamping
-	inputs->rClutchPaddle = CLAMP(inputs->rClutchPaddle, CLUTCH_PADDLE_MIN, CLUTCH_PADDLE_MAX);
+	inputs->rClutchPaddle = CLAMP(inputs->rClutchPaddle, rCLUTCH_PADDLE_MIN, rCLUTCH_PADDLE_MAX);
 
 	// ---------------------------------------------------------------------------------------------------
 	// PCB Supply Voltage Conditioning
@@ -100,7 +100,7 @@ void ReadInputs(InputStruct *inputs){
 	if(inputs->BUpShiftButtonState && (tUpButtonTimer + UP_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
 		inputs->BUpShiftButtonInError = 1;
 	}
-	if(!inputs->BUpShiftButtonState && (tUpButtonStuckTimmer + UP_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
+	else if(!inputs->BUpShiftButtonState && (tUpButtonStuckTimmer + UP_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
 		inputs->BUpShiftButtonInError = 0;
 	}
 
@@ -123,7 +123,7 @@ void ReadInputs(InputStruct *inputs){
 	if(inputs->BDnShiftButtonState && (tDnButtonTimer + DN_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
 		inputs->BDnShiftButtonInError = 1;
 	}
-	if(!inputs->BDnShiftButtonState && (tDnButtonStuckTimmer + DN_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
+	else if(!inputs->BDnShiftButtonState && (tDnButtonStuckTimmer + DN_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
 		inputs->BDnShiftButtonInError = 0;
 	}
 

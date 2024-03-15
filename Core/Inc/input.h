@@ -20,9 +20,8 @@
 // CLUTCH
 #define VrCLUTCH_MARGIN_MIN 				0.1f	// the voltage below the min map voltage we accept to arrive before declaring out of bounds
 #define VrCLUTCH_MARGIN_MAX 				0.1f	// the voltage above the max map voltage we accept to arrive before declaring out of bounds
-
-#define CLUTCH_PADDLE_MAX					104
-#define CLUTCH_PADDLE_MIN					-4
+#define rCLUTCH_PADDLE_MAX					104
+#define rCLUTCH_PADDLE_MIN					-4
 
 // TIMING (ms)
 #define UP_BUTTON_DEBOUNCE					50
@@ -38,7 +37,6 @@
 #define BUTTON_D_DEBOUNCE					100
 #define BUTTON_E_DEBOUNCE					100
 #define BUTTON_F_DEBOUNCE					100
-
 
 // CAN
 #define SIU_TX_ID							0x310
