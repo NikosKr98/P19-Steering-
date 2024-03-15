@@ -114,6 +114,7 @@ void ReadInputs(InputStruct *inputs){
 	else if(!inputs->BSIUDIN02 && inputs->BDnShiftButtonState) {
 		inputs->BDnShiftButtonState = 0;
 		inputs->BDnShiftButtonPressed = 0;
+		tDnButtonStuckTimmer = tInputsTimer;
 	}
 	// Auto reset Strategy
 	if(inputs->BDnShiftButtonPressed && (tDnButtonTimer + DN_BUTTON_RESET_TIMEOUT) < tInputsTimer) {
