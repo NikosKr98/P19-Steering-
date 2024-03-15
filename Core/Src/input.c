@@ -12,6 +12,8 @@
 //timing Variables!
 uint32_t tInputsTimer=0, tUpButtonTimer=0, tDnButtonTimer=0, tButtonATimer=0, tButtonBTimer=0, tButtonCTimer=0, tButtonDTimer=0, tButtonETimer=0, tButtonFTimer=0;
 
+// CAN
+volatile uint8_t BDO01Demand, BDO03Demand, BDO02Demand, BDO04Demand;
 volatile uint8_t NCANErrorCount;
 volatile uint16_t NCanGetRxErrorCount=0;
 
@@ -26,7 +28,7 @@ void ReadInputs(InputStruct *inputs){
 	tInputsTimer = HAL_GetTick();
 
 	// ---------------------------------------------------------------------------------------------------
-	//Analog Inputs
+	//Analog & Digital Inputs
 
 	//ADC Averaging
 	inputs->NADCChannel01Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 0);
@@ -40,6 +42,15 @@ void ReadInputs(InputStruct *inputs){
 	inputs->VSIUAnalog03 = (float)(inputs->NADCChannel03Raw * 3.3 / 4095.0);
 	inputs->VSIUAnalog04 = (float)(inputs->NADCChannel04Raw * 3.3 / 4095.0);
 
+	//Digital Read (we invert the logic to read 1 when it goes to GND, because of the pull ups)
+	inputs->BSIUDIN01 = !HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin);
+	inputs->BSIUDIN02 = !HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin);
+	inputs->BSIUDIN03 = !HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin);
+	inputs->BSIUDIN04 = !HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin);
+	inputs->BSIUDIN05 = !HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin);
+	inputs->BSIUDIN06 = !HAL_GPIO_ReadPin(DIN06_GPIO_Port, DIN06_Pin);
+	inputs->BSIUDIN07 = !HAL_GPIO_ReadPin(DIN07_GPIO_Port, DIN07_Pin);
+	inputs->BSIUDIN08 = !HAL_GPIO_ReadPin(DIN08_GPIO_Port, DIN08_Pin);
 
 	// ---------------------------------------------------------------------------------------------------
 	//Clutch Paddle
@@ -60,18 +71,17 @@ void ReadInputs(InputStruct *inputs){
 
 	inputs->VSupply = inputs->VSIUAnalog04 * VSUPPLY_DIVIDER_GAIN;
 
-
 	// ---------------------------------------------------------------------------------------------------
 	// Shifting Inputs
 
 	//Up Button
-	if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_RESET && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
+	if(inputs->BSIUDIN01 && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 1;
 		inputs->BUpShiftButtonPressed = 1;
 		tUpButtonTimer = tInputsTimer;
 		tUpButtonTimer += UP_BUTTON_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin) == GPIO_PIN_SET && inputs->BUpShiftButtonDebounce) {
+	else if(!inputs->BSIUDIN01 && inputs->BUpShiftButtonDebounce) {
 		inputs->BUpShiftButtonDebounce = 0;
 		inputs->BUpShiftButtonPressed = 0;
 	}
@@ -80,13 +90,13 @@ void ReadInputs(InputStruct *inputs){
 	}
 
 	//Down Button
-	if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_RESET && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
+	if(inputs->BSIUDIN02 && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 1;
 		inputs->BDnShiftButtonPressed = 1;
 		tDnButtonTimer = tInputsTimer;
 		tDnButtonTimer += DN_BUTTON_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin) == GPIO_PIN_SET && inputs->BDnShiftButtonDebounce) {
+	else if(!inputs->BSIUDIN02 && inputs->BDnShiftButtonDebounce) {
 		inputs->BDnShiftButtonDebounce = 0;
 		inputs->BDnShiftButtonPressed = 0;
 	}
@@ -98,77 +108,84 @@ void ReadInputs(InputStruct *inputs){
 	// Buttons
 
 	// Button A
-	if(HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin) == GPIO_PIN_RESET && tButtonATimer < tInputsTimer && !inputs->BButtonADebounce) {
+	if(inputs->BSIUDIN03 && tButtonATimer < tInputsTimer && !inputs->BButtonADebounce) {
 		inputs->BButtonADebounce = 1;
 		inputs->BButtonAPressed = 1;
 		tButtonATimer = tInputsTimer;
 		tButtonATimer += BUTTON_A_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin) == GPIO_PIN_SET && inputs->BButtonADebounce) {
+	else if(!inputs->BSIUDIN03 && inputs->BButtonADebounce) {
 		inputs->BButtonADebounce = 0;
 		inputs->BButtonAPressed = 0;
 	}
 
 	// Button B
-	if(HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin) == GPIO_PIN_RESET && tButtonBTimer < tInputsTimer && !inputs->BButtonBDebounce) {
+	if(inputs->BSIUDIN04 && tButtonBTimer < tInputsTimer && !inputs->BButtonBDebounce) {
 		inputs->BButtonBDebounce = 1;
 		inputs->BButtonBPressed = 1;
 		tButtonBTimer = tInputsTimer;
 		tButtonBTimer += BUTTON_B_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin) == GPIO_PIN_SET && inputs->BButtonBDebounce) {
+	else if(!inputs->BSIUDIN04 && inputs->BButtonBDebounce) {
 		inputs->BButtonBDebounce = 0;
 		inputs->BButtonBPressed = 0;
 	}
 
 	// Button C
-	if(HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin) == GPIO_PIN_RESET && tButtonCTimer < tInputsTimer && !inputs->BButtonCDebounce) {
+	if(inputs->BSIUDIN05 && tButtonCTimer < tInputsTimer && !inputs->BButtonCDebounce) {
 		inputs->BButtonCDebounce = 1;
 		inputs->BButtonCPressed = 1;
 		tButtonCTimer = tInputsTimer;
 		tButtonCTimer += BUTTON_C_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin) == GPIO_PIN_SET && inputs->BButtonCDebounce) {
+	else if(!inputs->BSIUDIN05 && inputs->BButtonCDebounce) {
 		inputs->BButtonCDebounce = 0;
 		inputs->BButtonCPressed = 0;
 	}
 
 	// Button D
-	if(HAL_GPIO_ReadPin(DIN06_GPIO_Port, DIN06_Pin) == GPIO_PIN_RESET && tButtonDTimer < tInputsTimer && !inputs->BButtonDDebounce) {
+	if(inputs->BSIUDIN06 && tButtonDTimer < tInputsTimer && !inputs->BButtonDDebounce) {
 		inputs->BButtonDDebounce = 1;
 		inputs->BButtonDPressed = 1;
 		tButtonDTimer = tInputsTimer;
 		tButtonDTimer += BUTTON_D_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN06_GPIO_Port, DIN06_Pin) == GPIO_PIN_SET && inputs->BButtonDDebounce) {
+	else if(!inputs->BSIUDIN06 && inputs->BButtonDDebounce) {
 		inputs->BButtonDDebounce = 0;
 		inputs->BButtonDPressed = 0;
 	}
 
 	// Button E
-	if(HAL_GPIO_ReadPin(DIN07_GPIO_Port, DIN07_Pin) == GPIO_PIN_RESET && tButtonETimer < tInputsTimer && !inputs->BButtonEDebounce) {
+	if(inputs->BSIUDIN07 && tButtonETimer < tInputsTimer && !inputs->BButtonEDebounce) {
 		inputs->BButtonEDebounce = 1;
 		inputs->BButtonEPressed = 1;
 		tButtonETimer = tInputsTimer;
 		tButtonETimer += BUTTON_E_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN07_GPIO_Port, DIN07_Pin) == GPIO_PIN_SET && inputs->BButtonEDebounce) {
+	else if(!inputs->BSIUDIN07 && inputs->BButtonEDebounce) {
 		inputs->BButtonEDebounce = 0;
 		inputs->BButtonEPressed = 0;
 	}
 
 	// Button F
-	if(HAL_GPIO_ReadPin(DIN08_GPIO_Port, DIN08_Pin) == GPIO_PIN_RESET && tButtonFTimer < tInputsTimer && !inputs->BButtonFDebounce) {
+	if(inputs->BSIUDIN08 && tButtonFTimer < tInputsTimer && !inputs->BButtonFDebounce) {
 		inputs->BButtonFDebounce = 1;
 		inputs->BButtonFPressed = 1;
 		tButtonFTimer = tInputsTimer;
 		tButtonFTimer += BUTTON_F_DEBOUNCE;
 	}
-	else if(HAL_GPIO_ReadPin(DIN08_GPIO_Port, DIN08_Pin) == GPIO_PIN_SET && inputs->BButtonFDebounce) {
+	else if(!inputs->BSIUDIN08 && inputs->BButtonFDebounce) {
 		inputs->BButtonFDebounce = 0;
 		inputs->BButtonFPressed = 0;
 	}
 
+	// ---------------------------------------------------------------------------------------------------
+	// Digital Outputs
+
+	inputs->BSIUDO01Demand = BDO01Demand;
+	inputs->BSIUDO02Demand = BDO02Demand;
+	inputs->BSIUDO03Demand = BDO03Demand;
+	inputs->BSIUDO04Demand = BDO04Demand;
 
 	// ---------------------------------------------------------------------------------------------------
 }
@@ -209,7 +226,12 @@ void CAN_RX(CAN_HandleTypeDef *hcan, uint32_t RxFifo) {
 	switch(RxHeader.StdId) {
 
 	 case SIU_RX_ID :
-		 // TODO: TBC...
+
+		 BDO01Demand = (RxBuffer[0] >> 0) & 0x01;
+		 BDO02Demand = (RxBuffer[0] >> 1) & 0x01;
+		 BDO03Demand = (RxBuffer[0] >> 2) & 0x01;
+		 BDO04Demand = (RxBuffer[0] >> 3) & 0x01;
+
 		 break;
 
 	 default:

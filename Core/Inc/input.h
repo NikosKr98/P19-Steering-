@@ -61,6 +61,22 @@ typedef struct _InputStruct{
 	uint16_t NADCChannel03Raw;
 	uint16_t NADCChannel04Raw;
 
+	// Digital Inputs
+	uint8_t BSIUDIN01;
+	uint8_t BSIUDIN02;
+	uint8_t BSIUDIN03;
+	uint8_t BSIUDIN04;
+	uint8_t BSIUDIN05;
+	uint8_t BSIUDIN06;
+	uint8_t BSIUDIN07;
+	uint8_t BSIUDIN08;
+
+	// Digital Outputs
+	uint8_t BSIUDO01Demand;
+	uint8_t BSIUDO02Demand;
+	uint8_t BSIUDO03Demand;
+	uint8_t BSIUDO04Demand;
+
 	//CLUTCH
 	uint8_t BrClutchPaddleInError;
 	float VrClutchPaddle;
@@ -88,7 +104,6 @@ typedef struct _InputStruct{
 	uint8_t BButtonDDebounce;
 	uint8_t BButtonEDebounce;
 	uint8_t BButtonFDebounce;
-
 
 	// Error Flags
 	uint8_t BUpShiftButtonInError;

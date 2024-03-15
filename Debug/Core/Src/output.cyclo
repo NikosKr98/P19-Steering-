@@ -1,3 +1,3 @@
 ../Core/Src/Output.c:17:6:InitOutput	1
 ../Core/Src/Output.c:20:6:Output	1
-../Core/Src/Output.c:54:6:CAN_TX	7
+../Core/Src/Output.c:61:6:CAN_TX	7

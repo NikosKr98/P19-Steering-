@@ -19,7 +19,14 @@ void InitOutput() {
 }
 void Output(InputStruct* inputs) {
 
+	// Digital Outputs
+	HAL_GPIO_WritePin(DO01_GPIO_Port, DO01_Pin, inputs->BSIUDO01Demand);
+	HAL_GPIO_WritePin(DO02_GPIO_Port, DO02_Pin, inputs->BSIUDO02Demand);
+	HAL_GPIO_WritePin(DO03_GPIO_Port, DO03_Pin, inputs->BSIUDO03Demand);
+	HAL_GPIO_WritePin(DO04_GPIO_Port, DO04_Pin, inputs->BSIUDO04Demand);
 
+
+	// CAN
 	CANTxBuffer[0] = 0;
 	CANTxBuffer[0] |= (inputs->BUpShiftButtonInError 	& 0x01) << 0;
 	CANTxBuffer[0] |= (inputs->BDnShiftButtonInError 	& 0x01) << 1;
