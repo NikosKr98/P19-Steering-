@@ -10,7 +10,7 @@
 
 
 //timing Variables!
-uint32_t tInputsTimer=0, tUpButtonTimer=0, tDnButtonTimer=0, tButtonATimer=0, tButtonBTimer=0, tButtonCTimer=0, tButtonDTimer=0, tButtonETimer=0, tButtonFTimer=0;
+uint32_t tInputsTimer=0, tUpButtonTimer=0, tUpButtonStuckTimmer=0, tDnButtonTimer=0, tDnButtonStuckTimmer=0, tButtonATimer=0, tButtonBTimer=0, tButtonCTimer=0, tButtonDTimer=0, tButtonETimer=0, tButtonFTimer=0;
 
 // CAN
 volatile uint8_t BDO01Demand, BDO03Demand, BDO02Demand, BDO04Demand;
@@ -52,6 +52,12 @@ void ReadInputs(InputStruct *inputs){
 	inputs->BSIUDIN07 = !HAL_GPIO_ReadPin(DIN07_GPIO_Port, DIN07_Pin);
 	inputs->BSIUDIN08 = !HAL_GPIO_ReadPin(DIN08_GPIO_Port, DIN08_Pin);
 
+	// Digital Outputs
+	inputs->BSIUDO01Demand = BDO01Demand;
+	inputs->BSIUDO02Demand = BDO02Demand;
+	inputs->BSIUDO03Demand = BDO03Demand;
+	inputs->BSIUDO04Demand = BDO04Demand;
+
 	// ---------------------------------------------------------------------------------------------------
 	//Clutch Paddle
 
@@ -72,120 +78,126 @@ void ReadInputs(InputStruct *inputs){
 	inputs->VSupply = inputs->VSIUAnalog04 * VSUPPLY_DIVIDER_GAIN;
 
 	// ---------------------------------------------------------------------------------------------------
-	// Shifting Inputs
+	// SIU Inputs
 
-	//Up Button
-	if(inputs->BSIUDIN01 && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonDebounce) {
-		inputs->BUpShiftButtonDebounce = 1;
+	// Up Shift Button
+	if(inputs->BSIUDIN01 && tUpButtonTimer < tInputsTimer && !inputs->BUpShiftButtonState) {
+		inputs->BUpShiftButtonState = 1;
 		inputs->BUpShiftButtonPressed = 1;
 		tUpButtonTimer = tInputsTimer;
 		tUpButtonTimer += UP_BUTTON_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN01 && inputs->BUpShiftButtonDebounce) {
-		inputs->BUpShiftButtonDebounce = 0;
+	else if(!inputs->BSIUDIN01 && inputs->BUpShiftButtonState) {
+		inputs->BUpShiftButtonState = 0;
+		inputs->BUpShiftButtonPressed = 0;
+		tUpButtonStuckTimmer = tInputsTimer;
+	}
+	// Auto reset Strategy
+	if(inputs->BUpShiftButtonPressed && (tUpButtonTimer + UP_BUTTON_RESET_TIMEOUT) < tInputsTimer) {
 		inputs->BUpShiftButtonPressed = 0;
 	}
-	else if(inputs->BUpShiftButtonPressed && (tUpButtonTimer + UP_BUTTON_TIMEOUT) < tInputsTimer) {
-		inputs->BUpShiftButtonPressed = 0;
+	// Stuck Detection
+	if(inputs->BUpShiftButtonState && (tUpButtonTimer + UP_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
+		inputs->BUpShiftButtonInError = 1;
+	}
+	if(!inputs->BUpShiftButtonState && (tUpButtonStuckTimmer + UP_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
+		inputs->BUpShiftButtonInError = 0;
 	}
 
-	//Down Button
-	if(inputs->BSIUDIN02 && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonDebounce) {
-		inputs->BDnShiftButtonDebounce = 1;
+	// Down Shift Button
+	if(inputs->BSIUDIN02 && tDnButtonTimer < tInputsTimer && !inputs->BDnShiftButtonState) {
+		inputs->BDnShiftButtonState = 1;
 		inputs->BDnShiftButtonPressed = 1;
 		tDnButtonTimer = tInputsTimer;
 		tDnButtonTimer += DN_BUTTON_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN02 && inputs->BDnShiftButtonDebounce) {
-		inputs->BDnShiftButtonDebounce = 0;
+	else if(!inputs->BSIUDIN02 && inputs->BDnShiftButtonState) {
+		inputs->BDnShiftButtonState = 0;
 		inputs->BDnShiftButtonPressed = 0;
 	}
-	else if(inputs->BDnShiftButtonPressed && (tDnButtonTimer + DN_BUTTON_TIMEOUT) < tInputsTimer) {
+	// Auto reset Strategy
+	if(inputs->BDnShiftButtonPressed && (tDnButtonTimer + DN_BUTTON_RESET_TIMEOUT) < tInputsTimer) {
 		inputs->BDnShiftButtonPressed = 0;
 	}
-
-	// ---------------------------------------------------------------------------------------------------
-	// Buttons
+	// Stuck Detection
+	if(inputs->BDnShiftButtonState && (tDnButtonTimer + DN_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
+		inputs->BDnShiftButtonInError = 1;
+	}
+	if(!inputs->BDnShiftButtonState && (tDnButtonStuckTimmer + DN_BUTTON_STUCK_TIMEOUT) < tInputsTimer) {
+		inputs->BDnShiftButtonInError = 0;
+	}
 
 	// Button A
-	if(inputs->BSIUDIN03 && tButtonATimer < tInputsTimer && !inputs->BButtonADebounce) {
-		inputs->BButtonADebounce = 1;
+	if(inputs->BSIUDIN03 && tButtonATimer < tInputsTimer && !inputs->BButtonAState) {
+		inputs->BButtonAState = 1;
 		inputs->BButtonAPressed = 1;
 		tButtonATimer = tInputsTimer;
 		tButtonATimer += BUTTON_A_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN03 && inputs->BButtonADebounce) {
-		inputs->BButtonADebounce = 0;
+	else if(!inputs->BSIUDIN03 && inputs->BButtonAState) {
+		inputs->BButtonAState = 0;
 		inputs->BButtonAPressed = 0;
 	}
 
 	// Button B
-	if(inputs->BSIUDIN04 && tButtonBTimer < tInputsTimer && !inputs->BButtonBDebounce) {
-		inputs->BButtonBDebounce = 1;
+	if(inputs->BSIUDIN04 && tButtonBTimer < tInputsTimer && !inputs->BButtonBState) {
+		inputs->BButtonBState = 1;
 		inputs->BButtonBPressed = 1;
 		tButtonBTimer = tInputsTimer;
 		tButtonBTimer += BUTTON_B_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN04 && inputs->BButtonBDebounce) {
-		inputs->BButtonBDebounce = 0;
+	else if(!inputs->BSIUDIN04 && inputs->BButtonBState) {
+		inputs->BButtonBState = 0;
 		inputs->BButtonBPressed = 0;
 	}
 
 	// Button C
-	if(inputs->BSIUDIN05 && tButtonCTimer < tInputsTimer && !inputs->BButtonCDebounce) {
-		inputs->BButtonCDebounce = 1;
+	if(inputs->BSIUDIN05 && tButtonCTimer < tInputsTimer && !inputs->BButtonCState) {
+		inputs->BButtonCState = 1;
 		inputs->BButtonCPressed = 1;
 		tButtonCTimer = tInputsTimer;
 		tButtonCTimer += BUTTON_C_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN05 && inputs->BButtonCDebounce) {
-		inputs->BButtonCDebounce = 0;
+	else if(!inputs->BSIUDIN05 && inputs->BButtonCState) {
+		inputs->BButtonCState = 0;
 		inputs->BButtonCPressed = 0;
 	}
 
 	// Button D
-	if(inputs->BSIUDIN06 && tButtonDTimer < tInputsTimer && !inputs->BButtonDDebounce) {
-		inputs->BButtonDDebounce = 1;
+	if(inputs->BSIUDIN06 && tButtonDTimer < tInputsTimer && !inputs->BButtonDState) {
+		inputs->BButtonDState = 1;
 		inputs->BButtonDPressed = 1;
 		tButtonDTimer = tInputsTimer;
 		tButtonDTimer += BUTTON_D_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN06 && inputs->BButtonDDebounce) {
-		inputs->BButtonDDebounce = 0;
+	else if(!inputs->BSIUDIN06 && inputs->BButtonDState) {
+		inputs->BButtonDState = 0;
 		inputs->BButtonDPressed = 0;
 	}
 
 	// Button E
-	if(inputs->BSIUDIN07 && tButtonETimer < tInputsTimer && !inputs->BButtonEDebounce) {
-		inputs->BButtonEDebounce = 1;
+	if(inputs->BSIUDIN07 && tButtonETimer < tInputsTimer && !inputs->BButtonEState) {
+		inputs->BButtonEState = 1;
 		inputs->BButtonEPressed = 1;
 		tButtonETimer = tInputsTimer;
 		tButtonETimer += BUTTON_E_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN07 && inputs->BButtonEDebounce) {
-		inputs->BButtonEDebounce = 0;
+	else if(!inputs->BSIUDIN07 && inputs->BButtonEState) {
+		inputs->BButtonEState = 0;
 		inputs->BButtonEPressed = 0;
 	}
 
 	// Button F
-	if(inputs->BSIUDIN08 && tButtonFTimer < tInputsTimer && !inputs->BButtonFDebounce) {
-		inputs->BButtonFDebounce = 1;
+	if(inputs->BSIUDIN08 && tButtonFTimer < tInputsTimer && !inputs->BButtonFState) {
+		inputs->BButtonFState = 1;
 		inputs->BButtonFPressed = 1;
 		tButtonFTimer = tInputsTimer;
 		tButtonFTimer += BUTTON_F_DEBOUNCE;
 	}
-	else if(!inputs->BSIUDIN08 && inputs->BButtonFDebounce) {
-		inputs->BButtonFDebounce = 0;
+	else if(!inputs->BSIUDIN08 && inputs->BButtonFState) {
+		inputs->BButtonFState = 0;
 		inputs->BButtonFPressed = 0;
 	}
-
-	// ---------------------------------------------------------------------------------------------------
-	// Digital Outputs
-
-	inputs->BSIUDO01Demand = BDO01Demand;
-	inputs->BSIUDO02Demand = BDO02Demand;
-	inputs->BSIUDO03Demand = BDO03Demand;
-	inputs->BSIUDO04Demand = BDO04Demand;
 
 	// ---------------------------------------------------------------------------------------------------
 }

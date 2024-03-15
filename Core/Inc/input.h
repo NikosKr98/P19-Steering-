@@ -27,8 +27,10 @@
 // TIMING (ms)
 #define UP_BUTTON_DEBOUNCE					50
 #define DN_BUTTON_DEBOUNCE					50
-#define UP_BUTTON_TIMEOUT					1000 - UP_BUTTON_DEBOUNCE
-#define DN_BUTTON_TIMEOUT					1000 - DN_BUTTON_DEBOUNCE
+#define UP_BUTTON_RESET_TIMEOUT				1000 - UP_BUTTON_DEBOUNCE
+#define DN_BUTTON_RESET_TIMEOUT				1000 - DN_BUTTON_DEBOUNCE
+#define UP_BUTTON_STUCK_TIMEOUT				2000 - UP_BUTTON_DEBOUNCE
+#define DN_BUTTON_STUCK_TIMEOUT				2000 - DN_BUTTON_DEBOUNCE
 
 #define BUTTON_A_DEBOUNCE					100
 #define BUTTON_B_DEBOUNCE					100
@@ -94,21 +96,20 @@ typedef struct _InputStruct{
 	uint8_t BButtonEPressed;
 	uint8_t BButtonFPressed;
 
-	// Debounce
-	uint8_t BUpShiftButtonDebounce;
-	uint8_t BDnShiftButtonDebounce;
+	// Button States
+	uint8_t BUpShiftButtonState;
+	uint8_t BDnShiftButtonState;
 
-	uint8_t BButtonADebounce;
-	uint8_t BButtonBDebounce;
-	uint8_t BButtonCDebounce;
-	uint8_t BButtonDDebounce;
-	uint8_t BButtonEDebounce;
-	uint8_t BButtonFDebounce;
+	uint8_t BButtonAState;
+	uint8_t BButtonBState;
+	uint8_t BButtonCState;
+	uint8_t BButtonDState;
+	uint8_t BButtonEState;
+	uint8_t BButtonFState;
 
 	// Error Flags
 	uint8_t BUpShiftButtonInError;
 	uint8_t BDnShiftButtonInError;
-
 
 	// CAN
 	uint8_t NCANErrors;				// CAN Bus error count
