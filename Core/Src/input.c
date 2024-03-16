@@ -37,10 +37,10 @@ void ReadInputs(InputStruct *inputs){
 	inputs->NADCChannel04Raw = MyHalfBufferAverage(adcRawValue, ADC_BUFFER_HALF_SIZE, NAdcBufferSide, 3);
 
 	//Voltage Conversion
-	inputs->VSIUAnalog01 = (float)(inputs->NADCChannel01Raw * 3.3 / 4095.0);
-	inputs->VSIUAnalog02 = (float)(inputs->NADCChannel02Raw * 3.3 / 4095.0);
-	inputs->VSIUAnalog03 = (float)(inputs->NADCChannel03Raw * 3.3 / 4095.0);
-	inputs->VSIUAnalog04 = (float)(inputs->NADCChannel04Raw * 3.3 / 4095.0);
+	inputs->VSIUAnalog01 = (float)(inputs->NADCChannel01Raw * MCU_SUPPLY_VOLTAGE / 4095.0);
+	inputs->VSIUAnalog02 = (float)(inputs->NADCChannel02Raw * MCU_SUPPLY_VOLTAGE / 4095.0);
+	inputs->VSIUAnalog03 = (float)(inputs->NADCChannel03Raw * MCU_SUPPLY_VOLTAGE / 4095.0);
+	inputs->VSIUAnalog04 = (float)(inputs->NADCChannel04Raw * MCU_SUPPLY_VOLTAGE / 4095.0);
 
 	//Digital Read (we invert the logic to read 1 when it goes to GND, because of the pull ups)
 	inputs->BSIUDIN01 = !HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin);
