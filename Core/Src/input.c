@@ -75,7 +75,7 @@ void ReadInputs(InputStruct *inputs){
 	// ---------------------------------------------------------------------------------------------------
 	// PCB Supply Voltage Conditioning
 
-	inputs->VSupply = inputs->VSIUAnalog04 * VSUPPLY_DIVIDER_GAIN;
+	inputs->VSupply = inputs->VSIUAnalog04 / VSUPPLY_DIVIDER_GAIN;
 
 	// ---------------------------------------------------------------------------------------------------
 	// SIU Inputs

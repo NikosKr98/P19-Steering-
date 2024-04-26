@@ -60,8 +60,8 @@ all: main-build
 main-build: P19-STEERING.elf secondary-outputs
 
 # Tool invocations
-P19-STEERING.elf P19-STEERING.map: $(OBJS) $(USER_OBJS) C:\Users\lenovo\Documents\_CODE\P19-Steering-\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "P19-STEERING.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\lenovo\Documents\_CODE\P19-Steering-\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="P19-STEERING.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+P19-STEERING.elf P19-STEERING.map: $(OBJS) $(USER_OBJS) C:\Users\NikosKr\Documents\_CODE\P19-Steering-\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "P19-STEERING.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\NikosKr\Documents\_CODE\P19-Steering-\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="P19-STEERING.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
