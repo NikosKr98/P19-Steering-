@@ -17,7 +17,7 @@
 
 static const float rClutchMap[2][CLUTCH_PADDLE_MAP_SIZE] = {
 
-		/* In:  VrClutchPaddleRaw */	{		0.500			,  			3.000	 	},
+		/* In:  VrClutchPaddleRaw */	{		1.08			,  			2.16	 	},
 		/* Out: rClutchPaddle 	  */	{ CLUTCH_PADDLE_MAP_MIN ,  CLUTCH_PADDLE_MAP_MAX}
 };
 

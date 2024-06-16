@@ -42,9 +42,9 @@ void ReadInputs(InputStruct *inputs){
 	inputs->VSIUAnalog03 = (float)(inputs->NADCChannel03Raw * MCU_SUPPLY_VOLTAGE / 4095.0);
 	inputs->VSIUAnalog04 = (float)(inputs->NADCChannel04Raw * MCU_SUPPLY_VOLTAGE / 4095.0);
 
-	//Digital Read (we invert the logic to read 1 when it goes to GND, because of the pull ups)
-	inputs->BSIUDIN01 = !HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin);
-	inputs->BSIUDIN02 = !HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin);
+	//Digital Read (for somr inputs we invert the logic to read 1 when it goes to GND, because of the pull ups)
+	inputs->BSIUDIN01 = HAL_GPIO_ReadPin(DIN01_GPIO_Port, DIN01_Pin);
+	inputs->BSIUDIN02 = HAL_GPIO_ReadPin(DIN02_GPIO_Port, DIN02_Pin);
 	inputs->BSIUDIN03 = !HAL_GPIO_ReadPin(DIN03_GPIO_Port, DIN03_Pin);
 	inputs->BSIUDIN04 = !HAL_GPIO_ReadPin(DIN04_GPIO_Port, DIN04_Pin);
 	inputs->BSIUDIN05 = !HAL_GPIO_ReadPin(DIN05_GPIO_Port, DIN05_Pin);
