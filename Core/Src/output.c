@@ -54,7 +54,7 @@ void Output(InputStruct* inputs) {
 	CANTxBuffer[3] = (VSupplyCAN & 0xFF00) >> 8;
 	CANTxBuffer[4] = (VSupplyCAN & 0x00FF) >> 0;
 
-	CAN_TX(SHIFTER_TX_ID, 8, CANTxBuffer);
+	CAN_TX(SIU_TX_ID01, 8, CANTxBuffer);
 }
 
 

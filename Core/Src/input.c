@@ -238,7 +238,7 @@ void CAN_RX(CAN_HandleTypeDef *hcan, uint32_t RxFifo) {
 	 //Don't forget to add and enable filters for each message
 	switch(RxHeader.StdId) {
 
-	 case SIU_RX_ID :
+	 case SHIFTER_TX_ID01 :
 
 		 BDO01Demand = (RxBuffer[0] >> 0) & 0x01;
 		 BDO02Demand = (RxBuffer[0] >> 1) & 0x01;

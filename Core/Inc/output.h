@@ -12,7 +12,7 @@
 #include <Utils.h>
 
 //CAN
-#define SHIFTER_TX_ID 0x310
+#define SIU_TX_ID01		0x310
 
 #define CAN_TX_TIMEOUT 200		// us of CAN timeout when sending a frame
 

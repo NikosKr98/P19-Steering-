@@ -302,7 +302,7 @@ static void MX_CAN_Init(void)
 
   // SIU RECEIVE
      CAN_FilterTypeDef FilterConfig1;
-     FilterConfig1.FilterIdHigh = SIU_RX_ID << 5 ;
+     FilterConfig1.FilterIdHigh = SHIFTER_TX_ID01 << 5 ;
      FilterConfig1.FilterIdLow = 0;
      FilterConfig1.FilterMaskIdHigh = 0xffe0;
      FilterConfig1.FilterMaskIdLow = 0;
@@ -318,7 +318,7 @@ static void MX_CAN_Init(void)
    	}
 
      CAN_FilterTypeDef FilterConfig11;
-     FilterConfig11.FilterIdHigh = SIU_RX_ID << 5 ;
+     FilterConfig11.FilterIdHigh = SHIFTER_TX_ID01 << 5 ;
      FilterConfig11.FilterIdLow = 0;
      FilterConfig11.FilterMaskIdHigh = 0xffe0;
      FilterConfig11.FilterMaskIdLow = 0;

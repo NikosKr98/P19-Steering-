@@ -39,8 +39,7 @@
 #define BUTTON_F_DEBOUNCE					100
 
 // CAN
-#define SIU_TX_ID							0x310
-#define SIU_RX_ID							0x320
+#define SHIFTER_TX_ID01						0x320
 
 
 extern uint16_t adcRawValue[ADC_BUFFER_SIZE];
